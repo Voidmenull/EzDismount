@@ -202,7 +202,6 @@ end
 -------------------------------
 function EzDismount_chkerror(arg1)
 
-
    -- See if auto dismount is enabled
 	if (EzDismount_Config[EzDPlayer]["Dismount"] ~= "OFF") then
 
@@ -242,6 +241,8 @@ function EzDismount_chkerror(arg1)
    elseif (EzDClass == "Priest") then
       EzDismount_chkandgetdown("Shadowform", EzDShiftErr.Error, arg1);
 
+   elseif (EzDClass == "Rogue") then
+      EzDismount_chkandgetdown("Stealth", EzDShiftErr.Error, arg1);
 
    end
    
@@ -264,6 +265,11 @@ function EzDismount_chkandgetdown(chkType, errorTable, msg, mount)
                 EzDismount_getdown(mount);
                 break;
              end
+			 
+         end
+		 if ( msg == "You can't do that while you are immune.") then
+			EzDismount_getdown(mount);
+            
          end
 
       end
@@ -279,6 +285,7 @@ function EzDismount_getdown(mount)
 	local currBuffTex;
 	local pallyhorse  = "spell_nature_swiftness";
   	local regMount    = "_mount_";
+	local torta 	  = "inv_pet_speedy";
   	local bearform    = "ability_racial_bearform";
 	local catform     = "ability_druid_catform";
 	local travelform  = "ability_druid_travelform";
@@ -287,6 +294,7 @@ function EzDismount_getdown(mount)
 	local moonkin     = "spell_nature_forceofnature";
    	local aqmount     = "_qirajicrystal_"
    	local aquaticform = "ability_druid_aquaticform";
+	local stealth = "stealth"
 
 
    -- was this a dismount request or a shapeshift request?
@@ -298,7 +306,7 @@ function EzDismount_getdown(mount)
          if (currBuffTex and (not EzD_exclude(i))) then
 
             -- Mount (or level 40 pally horse) or Qiraji Mounts
-            if ((string.find(string.lower(currBuffTex), regMount) or string.find(string.lower(currBuffTex), pallyhorse)) or (string.find(string.lower(currBuffTex), aqmount))) then
+            if ((string.find(string.lower(currBuffTex), regMount) or string.find(string.lower(currBuffTex), pallyhorse)) or (string.find(string.lower(currBuffTex), aqmount))) or (string.find(string.lower(currBuffTex), torta))then
                if ((EzDismount_Config[EzDPlayer]["Dismount"] == "ON") or (EzDismount_Config[EzDPlayer]["Dismount"] == "TAXI")) then
                   CancelPlayerBuff(i);
                end
@@ -313,8 +321,13 @@ function EzDismount_getdown(mount)
 
          if (currBuffTex and (not EzD_exclude(i))) then
 
+			-- Rogue Stealth
+			if (string.find(string.lower(currBuffTex), stealth)) then
+				CancelPlayerBuff(i);
+			
+		 
             -- GhostWolf
-            if (string.find(string.lower(currBuffTex), spiritwolf)) then
+            elseif (string.find(string.lower(currBuffTex), spiritwolf)) then
                if (EzDismount_Config[EzDPlayer]["Wolf"] == "ON") then
                   CancelPlayerBuff(i);
                   break;
